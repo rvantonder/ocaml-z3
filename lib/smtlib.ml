@@ -7,14 +7,18 @@ type solver = { stdin : out_channel; stdout : in_channel; stdout_lexbuf : Lexing
 (* Does not flush *)
 let rec write_sexp (out_chan : out_channel) (e : sexp): unit = match e with
   | SInt n -> output_string out_chan (string_of_int n)
-  | SBitVec (n, w) -> Printf.fprintf out_chan "(_ bv%d %d)" n w
-  | SBitVec64 n -> Printf.fprintf out_chan "(_ bv%Ld 64)" n
+  | SBitVec (n, w) -> Format.fprintf (Format.formatter_of_out_channel out_chan) "(_ bv%d %d)" n w
+  | SBitVec64 n -> Format.fprintf (Format.formatter_of_out_channel out_chan) "(_ bv%Ld 64)" n
   | SSymbol str -> output_string out_chan str
   | SKeyword str -> output_string out_chan str
   | SString str ->
     (output_char out_chan '(';
      output_string out_chan str;
      output_char out_chan ')')
+  | QSString str ->
+    (output_char out_chan '"';
+     output_string out_chan str;
+     output_char out_chan '"')
   | SList lst ->
     (output_char out_chan '(';
      write_sexp_list out_chan lst;
@@ -30,6 +34,7 @@ and write_sexp_list (out_chan : out_channel) (es : sexp list) : unit =
        write_sexp_list out_chan es)
 
 let write (solver : solver) (e : sexp) : unit =
+  (*write_sexp stdout e;*) (* XXX rvt debug *)
   write_sexp solver.stdin e;
   output_char solver.stdin '\n';
   flush solver.stdin
@@ -57,7 +62,7 @@ let handle_sigchild (_ : int) : unit =
   then ignore @@ Unix.waitpid [] (-1)
   else
     begin
-      let open Printf in
+      let open Format in
       let (pid, status) = Unix.waitpid [] (-1) in
       eprintf "solver child (pid %d) exited\n%!" pid;
       try
@@ -102,6 +107,7 @@ let sexp_to_string (sexp : sexp) : string =
     | SSymbol x -> add_string buf x;
     | SKeyword x -> add_string buf x;
     | SString x -> add_char buf '"'; add_string buf x; add_char buf '"'
+    | QSString x -> add_string buf "\""; add_string buf x; add_string buf "\""
     | SInt n -> add_string buf (string_of_int n)
     | SBitVec (n, w) -> add_string buf (Format.sprintf "(_ bv%d %d)" n w)
     | SBitVec64 n -> add_string buf (Format.sprintf "(_ bv%Ld 64)" n)
@@ -141,6 +147,7 @@ type sort =
 
 type term =
   | String of string
+  | QString of string
   | Int of int
   | BitVec of int * int
   | BitVec64 of int64
@@ -193,6 +200,7 @@ let rec sort_to_sexp (sort : sort) : sexp = match sort with
 
 let rec term_to_sexp (term : term) : sexp = match term with
   | String s -> SString s
+  | QString s -> QSString s
   | Int n -> SInt n
   | BitVec (n, w) -> SBitVec (n, w)
   | BitVec64 n -> SBitVec64 n
@@ -205,6 +213,7 @@ let rec term_to_sexp (term : term) : sexp = match term with
 
 let rec sexp_to_term (sexp : sexp) : term = match sexp with
   | SString s -> String s
+  | QSString s -> QString s
   | SInt n -> Int n
   | SBitVec (n, w) -> BitVec (n, w)
   | SBitVec64 n -> BitVec64 n
@@ -401,3 +410,10 @@ let bvult = app2 "bvult"
 let bvule = app2 "bvule"
 let bvneg = app1 "bvneg"
 let bvnot = app1 "bvnot"
+
+module Str = struct
+
+  let concat terms =
+    App (Id "str.++", terms)
+
+end

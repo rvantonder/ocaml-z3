@@ -31,6 +31,7 @@ type sort =
 
 type term =
   | String of string
+  | QString of string
   | Int of int
   | BitVec of int * int
   | BitVec64 of int64
@@ -194,6 +195,15 @@ val bvule : term -> term -> term
 val bvneg : term -> term
 val bvnot : term -> term
 
+module Str : sig
+
+  (** [str.++ arg1 arg2 ...] String concatenation of one or more strings *)
+  val concat : term list -> term
+
+  (** ... TODO *)
+
+end
+
 (** {1 Low-level interface} *)
 
 (** The variant of s-expressions used by SMT-LIB. *)
@@ -201,6 +211,7 @@ type sexp = Syntax.sexp =
   | SList of sexp list
   | SSymbol of string
   | SString of string
+  | QSString of string (* a quoted string literal like "blah" *)
   | SKeyword of string
   | SInt of int
   | SBitVec of int * int

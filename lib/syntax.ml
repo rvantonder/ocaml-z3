@@ -4,6 +4,7 @@ type sexp =
   | SList of sexp list
   | SSymbol of string
   | SString of string
+  | QSString of string
   | SKeyword of string
   | SInt of int
   | SBitVec of int * int
