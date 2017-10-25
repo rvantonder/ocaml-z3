@@ -1,6 +1,6 @@
 open Sexplib.Std
 
-include Smtlib_syntax
+include Syntax
 
 type solver = { stdin : out_channel; stdout : in_channel; stdout_lexbuf : Lexing.lexbuf }
 
@@ -35,7 +35,7 @@ let write (solver : solver) (e : sexp) : unit =
   flush solver.stdin
 
 let read (solver : solver) : sexp =
-  Smtlib_parser.sexp Smtlib_lexer.token solver.stdout_lexbuf
+  Parser.sexp Lexer.token solver.stdout_lexbuf
 
 let command (solver : solver) (sexp : sexp) = write solver sexp; read solver
 
@@ -247,6 +247,11 @@ let maximize (solver : solver) (term : term) : unit =
 
 let minimize (solver : solver) (term : term) : unit =
   silent_command solver (SList ([SSymbol "minimize"; term_to_sexp term]))
+
+let read_objectives (solver : solver) : unit =
+  match read solver with
+  | SList [SSymbol "objectives"; SList l] -> ()
+  | s -> failwith ("unexpected result in optimized objective, got " ^ sexp_to_string s)
 
 let rec check_sat (solver : solver) : check_sat_result =
   let fail sexp  = failwith ("unexpected result from (check-sat), got " ^

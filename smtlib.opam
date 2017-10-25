@@ -1,0 +1,13 @@
+opam-version: "1.2"
+version: "0.1"
+maintainer: ["rvt"]
+authors: ["rvt"]
+homepage: "https://github.com/rvantonder"
+bug-reports: "https://github.com/rvantonder/smtlib/issues"
+dev-repo: "https://github.com/rvantonder/smtlib.git"
+license: "Apache-2.0"
+build: [["jbuilder" "build" "-p" name "-j" jobs "@install"]]
+depends: [
+  "ppx_jane"
+  "ppx_deriving"
+]
