@@ -9,4 +9,4 @@
 (library
   ((name smtlib)
    (public_name smtlib)
-   (libraries (menhirLib ppx_deriving ppx_jane))))
+   (libraries (core menhirLib ppx_deriving ppx_jane))))
