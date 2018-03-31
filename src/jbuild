@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(executable
+  ((libraries (smtlib))
+   (name main)))
+
+(alias
+ ((name DEFAULT)
+  (deps
+   (main.exe))))

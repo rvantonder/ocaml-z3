@@ -34,7 +34,7 @@ and write_sexp_list (out_chan : out_channel) (es : sexp list) : unit =
        write_sexp_list out_chan es)
 
 let write (solver : solver) (e : sexp) : unit =
-  (*write_sexp stdout e;*) (* XXX rvt debug *)
+  write_sexp stdout e; (* XXX rvt debug *)
   write_sexp solver.stdin e;
   output_char solver.stdin '\n';
   flush solver.stdin
