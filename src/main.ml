@@ -1,6 +1,17 @@
 open Smtlib
 open Format
 
+(** Asks Z3 to solve this:
+*
+* (set-option :print-success true)
+*
+* (declare-const x String)
+*
+* (assert (= (str.++ "hello " x " world") "hello quux world"))
+* (check-sat)
+* (get-model)
+*)
+
 let solver_path = "/Users/rvt/z3/z3-4.5.0-x64-osx-10.11.6/bin/z3"
 
 let pp term =
